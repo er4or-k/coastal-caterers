@@ -62,7 +62,7 @@ app.post("/api/book", async (req, res) => {
     }
 
     const mailOptions = {
-      from: `"Coastal Caterers" <${config.EMAIL_USER}>`,
+      from: `"Karavali Caterers" <${config.EMAIL_USER}>`,
       to: config.ADMIN_EMAIL,
       subject: `📌 New Booking – ${service || "Service"}`,
       html: `
@@ -101,6 +101,60 @@ app.post("/api/book", async (req, res) => {
   } catch (err) {
     console.error("❌ Email failed:", err);
     res.status(500).json({ message: "Email failed to send" });
+  }
+});
+
+app.post("/api/register", async (req, res) => {
+  try {
+    const { name, email, phone } = req.body;
+
+    if (!name || !email) {
+      return res.status(400).json({ message: "Missing fields" });
+    }
+
+    await transporter.sendMail({
+      from: `"Karavali Caterers" <${config.EMAIL_USER}>`,
+      to: config.ADMIN_EMAIL,
+      subject: "🆕 New User Registered",
+      html: `
+        <h2>New User Registration</h2>
+        <p><b>Name:</b> ${name}</p>
+        <p><b>Email:</b> ${email}</p>
+        <p><b>Phone:</b> ${phone || "Not provided"}</p>
+        <p><b>Time:</b> ${new Date().toLocaleString()}</p>
+      `,
+    });
+
+    res.json({ message: "Registered & email sent" });
+  } catch (err) {
+    console.error("Register email error:", err);
+    res.status(500).json({ message: "Registration email failed" });
+  }
+});
+
+app.post("/api/login", async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ message: "Email required" });
+    }
+
+    await transporter.sendMail({
+      from: `"Karavali Caterers" <${config.EMAIL_USER}>`,
+      to: config.ADMIN_EMAIL,
+      subject: "🔐 User Login Alert",
+      html: `
+        <h2>User Logged In</h2>
+        <p><b>Email:</b> ${email}</p>
+        <p><b>Time:</b> ${new Date().toLocaleString()}</p>
+      `,
+    });
+
+    res.json({ message: "Login email sent" });
+  } catch (err) {
+    console.error("Login email error:", err);
+    res.status(500).json({ message: "Login email failed" });
   }
 });
 
